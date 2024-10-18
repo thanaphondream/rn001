@@ -28,15 +28,10 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async (loginEmail = email, loginPassword = password) => {
     try {
       const response = await axios.post(
-        'https://f744-202-29-24-199.ngrok-free.app/api/auth/login/',
+        'https://type001-qnan.vercel.app/api/loing',
         {
           email: loginEmail,
           password: loginPassword,
-        },
-        {
-          headers: {
-            Authorization: 'Token 3110b82b454bcd20ba4740bf00ef832aad02f9b9',
-          },
         }
       );
       console.log(response.data.key)
