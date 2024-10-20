@@ -38,6 +38,7 @@ const LoginScreen = ({ navigation }) => {
 
       await AsyncStorage.setItem('userEmail', loginEmail);
       await AsyncStorage.setItem('userPassword', loginPassword);
+      console.log("HOme", { user: response.data.user })
       navigation.replace('bootom', { user: response.data.user });
     } catch (error) {
       if (error.response) {

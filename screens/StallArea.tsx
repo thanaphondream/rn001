@@ -4,24 +4,20 @@ import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 
 const StallArea = ({ route }) => {
-  const  userId  = route.params
+  const  user  = route.params
   const [market, setMarket] = useState([]);
   const navigation = useNavigation();
-  const user = userId.user.id
+  const userId = user.user.id
   // console.log(user)
 
   useEffect(() => {
     const getMarket = async () => {
       try {
         const response = await axios.get(
-          'https://f744-202-29-24-199.ngrok-free.app/api/markets/',
-          {
-            headers: {
-              Authorization: 'Token 3110b82b454bcd20ba4740bf00ef832aad02f9b9',
-            },
-          }
+          'https://type001-qnan.vercel.app/api/markets',
         );
-        setMarket(response.data.results);
+        setMarket(response.data);
+        console.log("market001", response.data)
       } catch (error) {
         console.error('Error fetching markets:', error);
       }
@@ -31,7 +27,7 @@ const StallArea = ({ route }) => {
   }, []);
 
   const handlePress = (id, market_name) => {
-    navigation.navigate('Lock', { id, user , market_name})
+    navigation.navigate('Lock', { id, userId , market_name})
     // navigation.navigate('Lock', { market_name });
   };
 

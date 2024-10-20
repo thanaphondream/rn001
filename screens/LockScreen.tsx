@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 
 const LockScreen = ({ route }) => {
   const { id, user, market_name } = route.params;
+  console.log(id, user, market_name)
   const [locks, setLocks] = useState([]);
   const [zones, setZones] = useState([]);
   const [groupedLocks, setGroupedLocks] = useState({});
@@ -14,40 +15,16 @@ const LockScreen = ({ route }) => {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedLocks, setSelectedLocks] = useState([]);
-  const [bookingStatus, setBookingStatus] = useState('');
   const [bookingDates, setBookingDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [lockAvailability, setLockAvailability] = useState({});
-  const navigation = useNavigation();
   const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     const fetchLocksAndZones = async () => {
       try {
-        const [locksResponse, zonesResponse] = await Promise.all([
-          axios.get('https://f744-202-29-24-199.ngrok-free.app/api/look/', {
-            headers: {
-              Authorization: 'Token 3110b82b454bcd20ba4740bf00ef832aad02f9b9',
-            },
-          }),
-          axios.get('https://f744-202-29-24-199.ngrok-free.app/api/zone/', {
-            headers: {
-              Authorization: 'Token 3110b82b454bcd20ba4740bf00ef832aad02f9b9',
-            },
-          }),
-        ]);
-        const filteredLocks = locksResponse.data.results.filter(lock => lock.markets_id === id);
-        setLocks(filteredLocks);
-        setZones(zonesResponse.data.results);
-
-        const grouped = {};
-        filteredLocks.forEach(lock => {
-          const zone = zonesResponse.data.results.find(z => z.id === lock.zone)?.zone || 'Unknown';
-          if (!grouped[zone]) {
-            grouped[zone] = [];
-          }
-          grouped[zone].push(lock);
-        });
-        setGroupedLocks(grouped);
+       const zoneRepost = await axios.get(`https://type001-qnan.vercel.app/api/zone/${id}`)
+       setZones(zoneRepost.data)
+        console.log(zoneRepost.data)
       } catch (error) {
         console.error('Failed to fetch locks and zones:', error);
         Alert.alert('Error', 'Failed to fetch locks and zones');
@@ -59,11 +36,7 @@ const LockScreen = ({ route }) => {
     fetchLocksAndZones();
   }, [id]);
 
-  useEffect(() => {
-    if (locks.length > 0) {
-      checkAllLocksAvailability(bookingDates); 
-    }
-  }, [locks, bookingDates]);
+
 
   const handleConfirm = (date) => {
     setSelectedDate(date);
@@ -72,50 +45,14 @@ const LockScreen = ({ route }) => {
     setDatePickerVisibility(false);
   };
 
-  const checkAllLocksAvailability = async (date) => {
-    const availability = {};
-    for (const lock of locks) {
-      try {
-        const response = await axios.get('https://f744-202-29-24-199.ngrok-free.app/api/booking/', {
-          headers: {
-            Authorization: 'Token 3110b82b454bcd20ba4740bf00ef832aad02f9b9',
-          },
-          params: {
-            booking_date: date,
-            lock: lock.id,
-          },
-        });
+  
+  const LockButton01 = (lock ) => {
+    console.log(577777,lock)
 
-        const isBooked = response.data.results.some(item => item.booking_date === date && item.lock.includes(lock.id) && item.status === 'ชำระแล้ว');
-        availability[lock.id] = !isBooked;
-      } catch (error) {
-        console.error(`Failed to check availability for lock ${lock.lock_name}:`, error);
-      }
+    if(lock.id){
+     if()
     }
-    setLockAvailability(availability);
-  };
-
-  const toggleLockSelection = (lock) => {
-    const isSelected = selectedLocks.some(selectedLock => selectedLock.id === lock.id);
-    if (isSelected) {
-      setSelectedLocks(selectedLocks.filter(selectedLock => selectedLock.id !== lock.id));
-    } else {
-      setSelectedLocks([...selectedLocks, lock]);
-    }
-  };
-
-  const LockButton = ({ lock, zone }) => {
-    const isAvailable = lockAvailability[lock.id];
-    const isSelected = selectedLocks.some(selectedLock => selectedLock.id === lock.id);
-    return (
-      <TouchableOpacity
-        style={[styles.lockButton, isAvailable ? styles.available : styles.unavailable, isSelected && styles.selected]}
-        onPress={() => isAvailable && toggleLockSelection(lock)}
-        disabled={!isAvailable}
-      >
-        <Text style={styles.lockButtonText}>{`ล็อก ${lock.lock_name}${zone}`}</Text>
-      </TouchableOpacity>
-    );
+   
   };
 
   if (loading) {
@@ -127,10 +64,10 @@ const LockScreen = ({ route }) => {
   }
 
   const handleSearch = (text) => {
-    setSearchText(text);
+    setSearchText(text)
   };
 
-  const totalPrice = selectedLocks.reduce((total, lock) => total + parseFloat(lock.lock_price), 0);
+ 
 
   return (
     <View style={styles.container}>
@@ -156,32 +93,19 @@ const LockScreen = ({ route }) => {
         onCancel={() => setDatePickerVisibility(false)}
       />
       <View style={styles.View04}>
-        {Object.keys(groupedLocks).map(zone => (
-          <View key={zone}>
-            <View style={styles.View02}>
-              <Text style={styles.zoneHeader}>{`โซน ${zone}`}</Text>
-              <View style={styles.View03}><Text style={styles.circle01}></Text><Text> ว่าง  </Text><Text style={styles.circle02}></Text><Text> ไม่ว่าง </Text></View>
-            </View>
-            <View style={styles.lockGrid}>
-              {groupedLocks[zone].map(lock => (
-                <LockButton key={lock.id} lock={lock} zone={zone} />
-              ))}
-            </View>
+        {zones.map(zone=> (
+          <View key={zone.id}>
+              <Text>{zone.zone}</Text>
+              {
+                zone.Lock.map(m => (
+                  <View>
+                    {/* <Text>{m.lock_name}</Text> */}
+                    { LockButton01(m) }
+                  </View>
+                ))
+              }
           </View>
         ))}
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}>
-          <View style={styles.bookingSummary}>
-            <Text style={styles.Textbooking01}></Text>
-            <Text style={styles.label}>{`ราคาสำหรับ ${selectedLocks.length} ล็อก: ${totalPrice} บาท`}</Text>
-            {bookingStatus && <Text>สถานะการจอง: {bookingStatus}</Text>}
-            <TouchableOpacity
-              style={styles.nextButton}
-              onPress={() => selectedLocks.length > 0 && navigation.navigate('Booking', { lockIds: selectedLocks.map(lock => lock.id), id, user, bookingDates, market_name })}
-            >
-              <Text style={styles.button}>ถัดไป</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
       </View>
     </View>
   );

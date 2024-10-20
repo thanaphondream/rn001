@@ -3,15 +3,15 @@ import { View, Text, StyleSheet, Button, Image, ScrollView, RefreshControl } fro
 import axios from 'axios';
 
 const HomeScreen = ({ navigation, route }) => {
-  const userId = route.params;
+  const user = route.params;
   // const storeId = route.params;
   // console.log("dd",storeId)
-  const [user, setUser] = useState(null);
+  const [users, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [store, setStore] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  console.log(user)
+  console.log("Username0002",user)
 
   const getUser = async () => {
     try {
@@ -33,7 +33,7 @@ const HomeScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     getUser();
-  }, [userId]);
+  }, [user]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -59,7 +59,7 @@ const HomeScreen = ({ navigation, route }) => {
         {user && (
           <View style={styles.profile}>
             <Image source={require('../imastall/0f287e8affb3fdda15b5f3d802848e18.jpg')} style={styles.imgprofile} />
-            <Text style={styles.userInfoText}>{user.username}xxxxxx</Text>
+            <Text style={styles.userInfoText}>{user.user.username}xxxxxx</Text>
           </View>
         )}
 
