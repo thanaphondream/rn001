@@ -47,10 +47,16 @@ const LockScreen = ({ route }) => {
 
   
   const LockButton01 = (lock ) => {
-    console.log(577777,lock)
+    console.log(577777,bookingDates)
 
     if(lock.id){
-     if()
+      if(bookingDates){
+        return(
+          <View style= { styles.View02}>
+             <Text style={styles.circle01}>{lock.lock_name}</Text>
+          </View>
+        )
+      }
     }
    
   };
