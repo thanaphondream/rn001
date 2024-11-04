@@ -6,14 +6,17 @@ import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
 
 const LockScreen = ({ route }) => {
-  const { id, user, market_name } = route.params;
+  const { id, userId, market_name } = route.params;
+  console.log("user", userId)
   const [locks, setLocks] = useState([]);
   const [zones, setZones] = useState([]);
+  const navigation = useNavigation()
   const [bookings, setBooking] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bookingDates, setBookingDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [selectedLocks, setSelectedLocks] = useState([]);
   const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
@@ -32,9 +35,7 @@ const LockScreen = ({ route }) => {
     const fetchBookings = async () => {
       try {
         const bookingResponse = await axios.get('https://type001-qnan.vercel.app/api/bookings', {
-          headers: {
-            Authorization: `Token your-token-here`,
-          },
+          headers: { Authorization: `Token your-token-here` },
         });
         setBooking(bookingResponse.data);
       } catch (error) {
@@ -52,31 +53,53 @@ const LockScreen = ({ route }) => {
     setDatePickerVisibility(false);
   };
 
-  const renderLockButton = (lock, booking, booking1) => {
-    const formattedDate = format(booking.booking_date, 'yyyy-MM-dd');
-    const isAvailable = bookingDates !== formattedDate;
-    if(booking1.id === lock.id) {
-      if(isAvailable) {
-        return (
-          <View style={[styles.lockButton, styles.available]}>
-            <Text style={styles.lockButtonText}>{lock.lock_name}</Text>
-          </View>
-        );
-      }else{
-        return (
-          <View style={[styles.lockButton, styles.unavailable]}>
-            <Text style={styles.lockButtonText}>{lock.lock_name}</Text>
-          </View>
-        );
-      }
-    
+  const toggleLockSelection = (lock) => {
+    const isSelected = selectedLocks.some(selectedLock => selectedLock.id === lock.id);
+    if (isSelected) {
+      setSelectedLocks(selectedLocks.filter(selectedLock => selectedLock.id !== lock.id));
+    } else {
+      setSelectedLocks([...selectedLocks, lock]);
     }
+  };
+
+  const totalPrice = selectedLocks.length * 100;
+  const bookingStatus = ''; 
+
+  const renderLockButton = (lock) => {
+    const shownLockIds = new Set();
+    bookings.forEach((booking) => {
+      booking.lock.forEach((booking1) => {
+        if (booking1.id === lock.id && bookingDates === format(booking.booking_date, 'yyyy-MM-dd')) {
+          shownLockIds.add(lock.id);
+        }
+      });
+    });
+
+    const isAvailable = !shownLockIds.has(lock.id);
+
     return (
-      <View style={[styles.lockButton, styles.available]}>
+      <TouchableOpacity
+        key={lock.id}
+        style={[styles.lockButton, isAvailable ? styles.available : styles.unavailable]}
+        onPress={() => isAvailable && toggleLockSelection(lock)}
+        disabled={!isAvailable}
+      >
         <Text style={styles.lockButtonText}>{lock.lock_name}</Text>
-      </View>
+      </TouchableOpacity>
     );
   };
+
+  const bookitLink = () => {
+    if (selectedLocks.length > 0) {
+      navigation.navigate('Booking', {
+        lockIds: selectedLocks.map(lock => lock.id),
+        id,
+        userId,
+        bookingDates,
+        market_name,
+      });
+    }
+  }
 
   if (loading) {
     return (
@@ -114,17 +137,24 @@ const LockScreen = ({ route }) => {
           <View key={zone.id} style={styles.zone}>
             <Text style={styles.zoneHeader}>{zone.zone}</Text>
             <View style={styles.lockGrid}>
-              {zone.Lock.map((lock) =>
-                bookings.map((booking) => booking.lock.map(booking1 => renderLockButton(lock, booking, booking1)))
-              )}
+              {zone.Lock.map((lock) => renderLockButton(lock))}
             </View>
           </View>
         ))}
       </ScrollView>
+      <View style={styles.bookingSummary}>
+        <Text style={styles.label}>{`ราคาสำหรับ ${selectedLocks.length} ล็อก: ${totalPrice} บาท`}</Text>
+        {bookingStatus && <Text>สถานะการจอง: {bookingStatus}</Text>}
+        <TouchableOpacity
+          style={styles.nextButton}
+          onPress={() => bookitLink()}
+        >
+          <Text >ดำเนินการต่อ</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -198,12 +228,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   available: {
-    backgroundColor: '#DFF0D8',
-    borderColor: '#A9DFBF',
+    backgroundColor: '#faf0c8',
+    borderColor: '#faf0c8',
   },
   unavailable: {
-    backgroundColor: '#FADBD8',
-    borderColor: '#F5B7B1',
+    backgroundColor: '#f4edeb',
+    borderColor: '#f4edeb',
   },
   lockButtonText: {
     fontSize: 14,
@@ -213,6 +243,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  bookingSummary: {
+    marginTop: 20,
+  },
+  nextButton: {
+    marginTop: 20,
+    backgroundColor: '#FFB703',
+    padding: 10,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  button: {
+    color: '#fff',
+    fontSize: 16,
+  },
+
+  Textbooking01: {
+    borderBottomColor: '#a8a8a8',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  label: {
+    fontSize: 16,
+    marginVertical: 10,
+    textAlign: 'right'
   },
 });
 

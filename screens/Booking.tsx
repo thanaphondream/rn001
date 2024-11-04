@@ -4,21 +4,20 @@ import { View, Text, StyleSheet, Button, ScrollView, TouchableOpacity } from 're
 import { useNavigation } from '@react-navigation/native';
 
 const Booking = ({ route }) => {
-  const { lockIds,id, user, bookingDates, market_name } = route.params;
-  // console.log('gddsssss', market_name)
+  const { lockIds,id, userId, bookingDates, market_name } = route.params;
+  console.log('gddsssss',lockIds,id, userId, bookingDates, market_name )
   const navigation = useNavigation();
   const [locks, setLocks] = useState([]);
   const electricityFee = 50.00;
   const discount = 0.0;
   console.log("dd",lockIds)
-  // const [ bookingsF, setBookingF ] = useState([])
 
   const [bookings, setBookings] = useState({
     booking_date: bookingDates,
     total_amount: 0,
     discount: discount,
     lock: lockIds,
-    user: user,
+    user: userId,
     status: 'ยังไม่ชำระ',
     markets: id
   });
@@ -27,57 +26,42 @@ const Booking = ({ route }) => {
     const getLocks = async () => {
       try {
         const lockRequests = lockIds.map((lockId) =>
-          axios.get(`https://f744-202-29-24-199.ngrok-free.app/api/lockzon/${lockId}/`, {
-            headers: {
-              Authorization: 'Token 3110b82b454bcd20ba4740bf00ef832aad02f9b9',
-            },
-          })
+          axios.get(`https://type001-qnan.vercel.app/api/locks/${lockId}`)
         );
-
         const lockResponses = await Promise.all(lockRequests);
         const lockData = lockResponses.map((response) => response.data);
+        console.log("jjjjjjjj",lockResponses.map((l)=> l.data),lockData)
         setLocks(lockData);
-        console.log("Dd",locks)
-
-        const totalLockPrice = lockData.reduce((sum, lock) => sum + parseFloat(lock.lock_price), 0);
-        console.log(totalLockPrice)
-        // const totalAmount = (totalLockPrice + electricityFee - discount).toFixed(2);
-        const totalAmount = (totalLockPrice  - discount + 50).toFixed(2);
-        console.log("ddss",lockData, totalAmount)
-
+  
+        const totalLockPrice = lockData.reduce((sum, lock) => {
+          return lock && lock.lock_price ? sum + parseFloat(lock.lock_price) : sum;
+        }, 0);
+  
+        const totalAmount = (totalLockPrice - discount + electricityFee).toFixed(2);
         setBookings((prevBookings) => ({
           ...prevBookings,
-          total_amount: totalAmount/2 ,
+          total_amount: totalAmount / 2,
         }));
-
-        // const rs = await axios.get('https://f744-202-29-24-199.ngrok-free.app/api/booking/')
-        // setBookingF(rs.data)
-        // console.log(rs.data)
       } catch (err) {
         console.log('Error fetching lock data:', err);
       }
     };
-
+  
     getLocks();
   }, [lockIds, electricityFee, discount]);
 
   const handleBooking = async () => {
     try {
       console.log(bookings)
-      const response = await axios.post('https://f744-202-29-24-199.ngrok-free.app/api/bookings01/', bookings, {
-        headers: {
-          Authorization: 'Token 3110b82b454bcd20ba4740bf00ef832aad02f9b9',
-        },
-      });
+      const response = await axios.post('https://f744-202-29-24-199.ngrok-free.app/api/bookings01/', bookings);
       console.log(response.data);
-      navigation.navigate('Payment', {booking: response.data.id, user, amount: response.data.total_amount}  );
+      navigation.navigate('Payment', {booking: response.data.id, userId, amount: response.data.total_amount}  );
 
 
     } catch (err) {
       console.log(err);
     }
   };
-
   const Details = () => {
     return(
       <View>
@@ -93,9 +77,9 @@ const Booking = ({ route }) => {
         <Text style={styles.market}>{market_name}</Text>
         <Text style={styles.header}>รายการจอง</Text>
         <View style={styles.conbooking}>
-          {locks.map((lock, index) => (
+        {locks.map((lock, index) => (
             <View key={index} style={styles.lockContainer}>
-              <Text style={styles.lockText}>โซน {lock.zone.zone} ล็อกที่ {lock.zone.zone}{lock.lock_name} </Text>
+              {/* <Text style={styles.lockText}>โซน {lock.zone.zone} ล็อกที่ {lock.zone.zone}{lock.lock_name} </Text> */}
               <Text style={styles.lockText}> {lock.lock_price}฿</Text>
             </View>
           ))}
