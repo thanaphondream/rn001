@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Image, TextInput} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import useAuth from '../router/Apps';
 
 const Profile = ({ navigation, route }) => {
-  const user = route.params;
+  const { me, loading } = useAuth();
   const [users, setUsers] = useState([]);
   const [store, setStore] = useState([]);
-
+  console.log(me)
   useEffect(() => {
     const Getuser = async () => {
       try {
-        const rs = await axios.get(`https://f744-202-29-24-199.ngrok-free.app/api/userupdate/${user.user.id}/`);
+        const rs = await axios.get(`https://f744-202-29-24-199.ngrok-free.app/api/userupdate/${me.id}/`);
         setUsers(rs.data);
 
         const rsS = await axios.get(`https://f744-202-29-24-199.ngrok-free.app/api/store/`);
@@ -22,10 +23,10 @@ const Profile = ({ navigation, route }) => {
     };
 
     Getuser();
-  }, [user.user.id]);
+  });
 
   const editprofileline = () => {
-    navigation.replace('Editprofile', user);
+    navigation.replace('Editprofile', me);
   };
 
   const handleLogout = () => {
@@ -42,9 +43,9 @@ const Profile = ({ navigation, route }) => {
           text: 'Confirm',
           onPress: async () => {
             try {
-              await AsyncStorage.removeItem('userEmail');
-              await AsyncStorage.removeItem('userPassword');
-              navigation.replace('Login');
+
+              await AsyncStorage.removeItem('token')
+              
             } catch (error) {
               console.error('Error logging out:', error);
             }
@@ -59,8 +60,8 @@ const Profile = ({ navigation, route }) => {
     <View style={styles.container}>
       <Image source={require('../imastall/0f287e8affb3fdda15b5f3d802848e18.jpg')} style={styles.imgprofile} />
       <View>
-        <Text style={styles.username}>{users.username}</Text>
-        <Text>{user.user.email}</Text>
+        {/* <Text style={styles.username}>{users.username}</Text> */}
+        {/* <Text>{me.email}</Text> */}
       </View>
 
       <View style={styles.infoContainer}>
@@ -75,7 +76,7 @@ const Profile = ({ navigation, route }) => {
         <TextInput
           style={styles.input}
           autoCapitalize="none"
-          value={user.user.username}
+          // value={me.username}
           editable={false}
         />
       </View>
@@ -84,7 +85,7 @@ const Profile = ({ navigation, route }) => {
         <TextInput
           style={styles.input}
           autoCapitalize="none"
-          value={user.user.email}
+          // value={me.email}
           editable={false}
         />
       </View>

@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+import useAuth from '../router/Apps';
 
 const StallArea = ({ route }) => {
-  const  user  = route.params
+  const { me, loading } = useAuth();
   const [market, setMarket] = useState([]);
   const navigation = useNavigation();
-  const userId = user.user.id
+  const userId = me.id
   // console.log(user)
 
   useEffect(() => {

@@ -1,9 +1,23 @@
-import React, { useContext } from 'react';
-import { AuthContext } from './Apps';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import useAuth from './Apps';
 
-const Allroter = () => {
-  return useContext(AuthContext)
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const { me, loading } = useAuth();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    if (!loading) {
+      setUser(me);
+    }
+  }, [me, loading]);
+
+  return (
+    <AuthContext.Provider value={{ user, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-export default Allroter;
-
+export const useAuthContext = () => useContext(AuthContext);

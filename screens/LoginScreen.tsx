@@ -8,22 +8,22 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const userEmail = await AsyncStorage.getItem('userEmail');
-        const userPassword = await AsyncStorage.getItem('userPassword');
+  // useEffect(() => {
+  //   const checkLoginStatus = async () => {
+  //     try {
+  //       const userEmail = await AsyncStorage.getItem('userEmail');
+  //       const userPassword = await AsyncStorage.getItem('userPassword');
 
-        if (userEmail && userPassword) {
-          handleLogin(userEmail, userPassword);
-        }
-      } catch (error) {
-        console.error('Error checking login status:', error);
-      }
-    };
+  //       if (userEmail && userPassword) {
+  //         handleLogin(userEmail, userPassword);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error checking login status:', error);
+  //     }
+  //   };
 
-    checkLoginStatus();
-  }, []);
+  //   checkLoginStatus();
+  // }, []);
 
   const handleLogin = async (loginEmail = email, loginPassword = password) => {
     try {
@@ -34,10 +34,10 @@ const LoginScreen = ({ navigation }) => {
           password: loginPassword,
         }
       );
-      console.log(response.data.key)
+      console.log(response.data)
 
-      await AsyncStorage.setItem('userEmail', loginEmail);
-      await AsyncStorage.setItem('userPassword', loginPassword);
+      await AsyncStorage.setItem('token', response.data.token)
+      
       console.log("HOme", { user: response.data.user })
       navigation.replace('bootom', { user: response.data.user });
     } catch (error) {

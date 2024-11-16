@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button, Image, ScrollView, RefreshControl } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import useAuth from '../router/Apps';
 
 
 const HomeScreen = ({ navigation, route }) => {
+  const { me, loading } = useAuth();
 
-  const user = route.params;
-  // const storeId = route.params;
-  // console.log("dd",storeId)
   const [users, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [bookings, setBookings] = useState([]);
@@ -46,7 +45,7 @@ const HomeScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     getUser();
-  }, [user]);
+  }, [me]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -68,10 +67,10 @@ const HomeScreen = ({ navigation, route }) => {
           <Image source={require('../imastall/a420b687c0217bfd449bfeb8014ccc8e.jpg')} style={styles.img} />
         </View>
 
-        {user && (
+        {me && (
           <View style={styles.profile}>
             <Image source={require('../imastall/0f287e8affb3fdda15b5f3d802848e18.jpg')} style={styles.imgprofile} />
-            <Text style={styles.userInfoText}>{user.user.username}xxxxxx</Text>
+            <Text style={styles.userInfoText}>{me.username}xxxxxx</Text>
           </View>
         )}
 
