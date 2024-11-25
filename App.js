@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import BottomTabNavigator from './screens/BottomTabNavigator';
 import StallArea from './screens/StallArea';
@@ -13,63 +12,67 @@ import useAuth from './router/Apps';
 
 const Stack = createNativeStackNavigator();
 
-const rou = (
-  <>
-    <Stack.Screen
-      name="Bottom" 
-      component={BottomTabNavigator}
-      options={{ headerShown: false }}
-    />
-    <Stack.Screen name="Home" component={HomeScreen} />
-    <Stack.Screen name="Area" component={StallArea} />
-    <Stack.Screen
-      name="Lock"
-      component={LockScreen}
-      options={({ route }) => ({
-        title: route.params?.market_name || 'Lock',
-        headerTitleAlign: 'center',
-        headerTitleStyle: { fontSize: 16, color: '#000000' },
-      })}
-    />
-    <Stack.Screen
-      name="Booking"
-      component={Booking}
-      options={{
-        title: 'สรุปข้อมูลการจอง',
-        headerTitleAlign: 'center',
-        headerTitleStyle: { fontSize: 16, color: '#000000' },
-      }}
-    />
-    <Stack.Screen name="Payment" component={Payment} />
-    <Stack.Screen
-      name="Editprofile"
-      component={Editprofile}
-      options={{
-        title: 'แก้ไขโปรไฟล์',
-        headerTitleAlign: 'center',
-        headerTitleStyle: { fontSize: 16, color: '#000000' },
-      }}
-    />
-  </>
-);
-
-const login = (
-  <Stack.Screen
-    name="Login"
-    component={LoginScreen}
-    options={{ headerShown: false }}
-  />
-);
-
 const Apps = () => {
-  const { me, loading } = useAuth();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      console.log("User is authenticated:", user);
+    }
+  }, [user]);
+
   if (loading) {
-    return <></>;  
+    return null; 
   }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={me ? 'Bottom' : 'Login'}>
-        {me ? rou : login}
+      <Stack.Navigator initialRouteName={user ? 'Home' : 'Login'}>
+
+          <>
+            <Stack.Screen
+              name="/"
+              component={BottomTabNavigator}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen name="StallArea" component={StallArea} />
+            <Stack.Screen
+              name="Lock"
+              component={LockScreen}
+              options={({ route }) => ({
+                title: route.params?.market_name || 'Lock',
+                headerTitleAlign: 'center',
+                headerTitleStyle: { fontSize: 16, color: '#000000' },
+              })}
+            />
+            <Stack.Screen
+              name="Booking"
+              component={Booking}
+              options={{
+                title: 'สรุปข้อมูลการจอง',
+                headerTitleAlign: 'center',
+                headerTitleStyle: { fontSize: 16, color: '#000000' },
+              }}
+            />
+            <Stack.Screen name="Payment" component={Payment} />
+            <Stack.Screen
+              name="Editprofile"
+              component={Editprofile}
+              options={{
+                title: 'แก้ไขโปรไฟล์',
+                headerTitleAlign: 'center',
+                headerTitleStyle: { fontSize: 16, color: '#000000' },
+              }}
+            />
+          </>
+
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+          
+
       </Stack.Navigator>
     </NavigationContainer>
   );

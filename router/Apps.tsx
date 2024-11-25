@@ -8,27 +8,47 @@ const useAuth = () => {
 
   useEffect(() => {
     const fetchMe = async () => {
+      setLoading(true);
+
       try {
         const token = await AsyncStorage.getItem('token');
+
         if (token) {
           const response = await axios.get('https://type001-qnan.vercel.app/api/me', {
-            headers: {
-              Authorization: `Token ${token}`,
-            },
+            headers: { Authorization: `Token ${token}` },
           });
-          console.log(1111111,me)
           setMe(response.data);
+        } else {
+          setMe(null);
         }
       } catch (error) {
-        console.error('Failed to fetch user data:', error);
+        console.error('Failed to fetch user data:', error.message || error);
+        setMe(null);
       } finally {
         setLoading(false);
       }
     };
+
     fetchMe();
   }, []);
 
-  return { me, loading };
+  useEffect(() => {
+    if (me) {
+      console.log('User data updated:', me);
+    }
+  }, [me]);
+
+  const logout = async (navigation) => {
+    try {
+      await AsyncStorage.removeItem('token');
+      setMe(null);
+      navigation.navigate('Login'); 
+    } catch (error) {
+      console.error('Failed to log out:', error.message || error);
+    }
+  };
+
+  return { user: me, loading, logout, setMe };
 };
 
 export default useAuth;

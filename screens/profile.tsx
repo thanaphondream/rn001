@@ -5,16 +5,23 @@ import axios from 'axios';
 import useAuth from '../router/Apps';
 
 const Profile = ({ navigation, route }) => {
-  const { me, loading } = useAuth();
+  const { user, logout } = useAuth();
+  console.log(11111,user)
   const [users, setUsers] = useState([]);
   const [store, setStore] = useState([]);
-  console.log(me)
   useEffect(() => {
     const Getuser = async () => {
       try {
-        const rs = await axios.get(`https://f744-202-29-24-199.ngrok-free.app/api/userupdate/${me.id}/`);
+        const token = AsyncStorage.getItem('token')
+        console.log(token)
+        const rs = await axios.get(`https://type001-qnan.vercel.app/api/me`,{
+          headers: {
+            Authorization: `Token ${token}`
+          }
+        });
+        console.log("box user shoew", rs.data)
         setUsers(rs.data);
-
+        setUsers(rs.data)
         const rsS = await axios.get(`https://f744-202-29-24-199.ngrok-free.app/api/store/`);
         setStore(rsS.data.results);
       } catch (err) {
@@ -26,7 +33,7 @@ const Profile = ({ navigation, route }) => {
   });
 
   const editprofileline = () => {
-    navigation.replace('Editprofile', me);
+    navigation.replace('Editprofile', user);
   };
 
   const handleLogout = () => {
@@ -43,9 +50,8 @@ const Profile = ({ navigation, route }) => {
           text: 'Confirm',
           onPress: async () => {
             try {
-
-              await AsyncStorage.removeItem('token')
-              
+              logout()
+              navigation.replace('Login')
             } catch (error) {
               console.error('Error logging out:', error);
             }
@@ -60,8 +66,8 @@ const Profile = ({ navigation, route }) => {
     <View style={styles.container}>
       <Image source={require('../imastall/0f287e8affb3fdda15b5f3d802848e18.jpg')} style={styles.imgprofile} />
       <View>
-        {/* <Text style={styles.username}>{users.username}</Text> */}
-        {/* <Text>{me.email}</Text> */}
+        {/* <Text style={styles.username}>{user.username}</Text> */}
+        {/* <Text>{user.email}</Text> */}
       </View>
 
       <View style={styles.infoContainer}>
@@ -76,7 +82,7 @@ const Profile = ({ navigation, route }) => {
         <TextInput
           style={styles.input}
           autoCapitalize="none"
-          // value={me.username}
+          // value={user.username}
           editable={false}
         />
       </View>
@@ -85,7 +91,7 @@ const Profile = ({ navigation, route }) => {
         <TextInput
           style={styles.input}
           autoCapitalize="none"
-          // value={me.email}
+          // value={user.email}
           editable={false}
         />
       </View>

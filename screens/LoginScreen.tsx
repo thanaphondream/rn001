@@ -1,29 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import useAuth from '../router/Apps';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-
-  // useEffect(() => {
-  //   const checkLoginStatus = async () => {
-  //     try {
-  //       const userEmail = await AsyncStorage.getItem('userEmail');
-  //       const userPassword = await AsyncStorage.getItem('userPassword');
-
-  //       if (userEmail && userPassword) {
-  //         handleLogin(userEmail, userPassword);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error checking login status:', error);
-  //     }
-  //   };
-
-  //   checkLoginStatus();
-  // }, []);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { setMe } = useAuth()
 
   const handleLogin = async (loginEmail = email, loginPassword = password) => {
     try {
@@ -34,12 +20,10 @@ const LoginScreen = ({ navigation }) => {
           password: loginPassword,
         }
       );
-      console.log(response.data)
-
-      await AsyncStorage.setItem('token', response.data.token)
-      
-      console.log("HOme", { user: response.data.user })
-      navigation.replace('bootom', { user: response.data.user });
+  
+      await AsyncStorage.setItem('token', response.data.token);
+      setMe(response.data); 
+      navigation.replace('/'); 
     } catch (error) {
       if (error.response) {
         console.error('Login error:', error.response.data);
@@ -58,14 +42,22 @@ const LoginScreen = ({ navigation }) => {
     navigation.navigate('Register');
   };
 
+  const onRefresh = async () => {
+    setIsRefreshing(true);
+    await AsyncStorage.clear();
+    setIsRefreshing(false); 
+  };
+
   return (
-    <View style={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
+    >
       <View style={styles.Viwe01}>
         <Text style={styles.Text01}>ยินดีต้อบรับ</Text>
         <Text style={styles.Text02}>เข้าสู้ระบบ</Text>
       </View>
       <View style={styles.Viwe02}>
-        {/* <Text style={styles.label}>Email</Text> */}
         <TextInput
           style={styles.input}
           value={email}
@@ -74,13 +66,12 @@ const LoginScreen = ({ navigation }) => {
           autoCapitalize="none"
           placeholder="  อีเมล"
         />
-        {/* <Text style={styles.label}>Password</Text> */}
         <TextInput
           style={styles.input}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-           placeholder="  รหัสผ่าน"
+          placeholder="  รหัสผ่าน"
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <TouchableOpacity style={styles.loginButton} onPress={() => handleLogin()}>
@@ -88,15 +79,16 @@ const LoginScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
       <View style={styles.View04}>
-      <Text >หรือ</Text>
+        <Text>หรือ</Text>
       </View>
       <View style={styles.Viwe03}>
-      <Text>ยังไม่มีบัญชีผู้ใช้งาน?</Text>
-      <Text onPress={handleRegister} style={{color: '#003170'}}>ลงทะเบียน</Text>
+        <Text>ยังไม่มีบัญชีผู้ใช้งาน?</Text>
+        <Text onPress={handleRegister} style={{ color: '#003170' }}>ลงทะเบียน</Text>
       </View>
-    </View>
+    </ScrollView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
