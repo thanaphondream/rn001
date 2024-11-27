@@ -7,7 +7,7 @@ import useAuth from '../router/Apps';
 
 
 const HomeScreen = ({ navigation, route }) => {
-  const { me, loading } = useAuth();
+  const { user, loading } = useAuth();
 
 
   const [users, setUser] = useState(null);
@@ -18,12 +18,12 @@ const HomeScreen = ({ navigation, route }) => {
   const getUser = async () => {
     try {
       const token = await AsyncStorage.getItem('token')
+      console.log("token", token)
       const response = await axios.get(`https://type001-qnan.vercel.app/api/me`,{
         headers: {
           Authorization: `Token ${token}`
         }
       });
-      console.log(token)
       setUser(response.data);
       // console.log("dd", response.data.username);
 
@@ -47,7 +47,7 @@ const HomeScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     getUser();
-  }, [me]);
+  }, [user]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -69,10 +69,10 @@ const HomeScreen = ({ navigation, route }) => {
           <Image source={require('../imastall/a420b687c0217bfd449bfeb8014ccc8e.jpg')} style={styles.img} />
         </View>
 
-        {me && (
+        {user && (
           <View style={styles.profile}>
             <Image source={require('../imastall/0f287e8affb3fdda15b5f3d802848e18.jpg')} style={styles.imgprofile} />
-            <Text style={styles.userInfoText}>{me.username}xxxxxx</Text>
+            <Text style={styles.userInfoText}>{user.username}xxxxxx</Text>
           </View>
         )}
 

@@ -3,17 +3,24 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import useAuth from '../router/Apps';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const StallArea = ({ route }) => {
-  const { me, loading } = useAuth();
   const [market, setMarket] = useState([]);
+  const [ userId, setId ] = useState([])
   const navigation = useNavigation();
-  const userId = me.id
+
   // console.log(user)
 
   useEffect(() => {
     const getMarket = async () => {
       try {
+        const token = await AsyncStorage.getItem('token')
+        const Getme = await axios.get('https://type001-qnan.vercel.app/api/me', {
+          headers: {
+            Authorization: "Token "+ token
+          }
+        })
         const response = await axios.get(
           'https://type001-qnan.vercel.app/api/markets',
         );
@@ -28,6 +35,7 @@ const StallArea = ({ route }) => {
   }, []);
 
   const handlePress = (id, market_name) => {
+    console.log(userId)
     navigation.navigate('Lock', { id, userId , market_name})
     // navigation.navigate('Lock', { market_name });
   };

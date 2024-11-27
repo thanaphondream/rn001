@@ -6,24 +6,21 @@ import useAuth from '../router/Apps';
 
 const Profile = ({ navigation, route }) => {
   const { user, logout } = useAuth();
-  console.log(11111,user)
   const [users, setUsers] = useState([]);
   const [store, setStore] = useState([]);
   useEffect(() => {
     const Getuser = async () => {
       try {
-        const token = AsyncStorage.getItem('token')
-        console.log(token)
+        const token = await AsyncStorage.getItem('token')
         const rs = await axios.get(`https://type001-qnan.vercel.app/api/me`,{
           headers: {
             Authorization: `Token ${token}`
           }
         });
-        console.log("box user shoew", rs.data)
-        setUsers(rs.data);
+        // console.log("box us  er shoew", rs.data.username, token)
         setUsers(rs.data)
-        const rsS = await axios.get(`https://f744-202-29-24-199.ngrok-free.app/api/store/`);
-        setStore(rsS.data.results);
+        // const rsS = await axios.get(`https://f744-202-29-24-199.ngrok-free.app/api/store/`);
+        // setStore(rsS.data.results);
       } catch (err) {
         console.error(`เกิดข้อผิดพลาด ${err}`);
       }
@@ -66,8 +63,8 @@ const Profile = ({ navigation, route }) => {
     <View style={styles.container}>
       <Image source={require('../imastall/0f287e8affb3fdda15b5f3d802848e18.jpg')} style={styles.imgprofile} />
       <View>
-        {/* <Text style={styles.username}>{user.username}</Text> */}
-        {/* <Text>{user.email}</Text> */}
+        <Text style={styles.username}>{users.username}</Text>
+        <Text>{users.email}</Text>
       </View>
 
       <View style={styles.infoContainer}>
@@ -82,7 +79,7 @@ const Profile = ({ navigation, route }) => {
         <TextInput
           style={styles.input}
           autoCapitalize="none"
-          // value={user.username}
+          value={users.username}
           editable={false}
         />
       </View>
@@ -91,7 +88,7 @@ const Profile = ({ navigation, route }) => {
         <TextInput
           style={styles.input}
           autoCapitalize="none"
-          // value={user.email}
+          value={users.email}
           editable={false}
         />
       </View>
