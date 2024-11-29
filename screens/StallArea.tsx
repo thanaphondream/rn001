@@ -21,11 +21,11 @@ const StallArea = ({ route }) => {
             Authorization: "Token "+ token
           }
         })
+        setId(Getme.data.id)
         const response = await axios.get(
           'https://type001-qnan.vercel.app/api/markets',
         );
         setMarket(response.data);
-        console.log("market001", response.data)
       } catch (error) {
         console.error('Error fetching markets:', error);
       }

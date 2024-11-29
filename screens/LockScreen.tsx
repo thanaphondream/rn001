@@ -51,7 +51,7 @@ const LockScreen = ({ route }) => {
     setSelectedDate(date);
     setBookingDate(format(date, 'yyyy-MM-dd'));
     setDatePickerVisibility(false);
-  };
+  }
 
   const toggleLockSelection = (lock) => {
     const isSelected = selectedLocks.some(selectedLock => selectedLock.id === lock.id);
